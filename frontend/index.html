@@ -1,18 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cyron AI</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyron AI</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="chat-container">
-  <h1>Cyron AI</h1>
-  <div id="chat-box"></div>
-  <textarea id="prompt" placeholder="Type your question..."></textarea>
-  <button id="submit">Send</button>
-</div>
-<script src="../backend-ish/script.js"></script>
+  <div class="chat-container">
+    <h1>Cyron AI</h1>
+    <div id="chat-box"></div>
+    <textarea id="prompt" placeholder="Type your question..."></textarea>
+    <button id="submit">Send</button>
+  </div>
+  <script>
+    const WORKER_URL = "https://cyron-worker.gx8nz7qrdr.workers.dev/";
+    let history = [];
+
+    document.getElementById("submit").addEventListener("click", async () => {
+      const prompt = document.getElementById("prompt").value.trim();
+      if (!prompt) return;
+
+      // Add user message
+      addMessage("user", prompt);
+      document.getElementById("prompt").value = "";
+
+      // Call worker API
+      const response = await fetch(WORKER_URL + "/api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, history })
+      });
+
+      const data = await response.json();
+      const aiResponse = data.choices?.[0]?.message?.content || "Error";
+
+      // Add AI response
+      addMessage("ai", aiResponse);
+      history.push({ role: "user", content: prompt });
+      history.push({ role: "assistant", content: aiResponse });
+    });
+
+    function addMessage(role, content) {
+      const chatBox = document.getElementById("chat-box");
+      const message = document.createElement("div");
+      message.className = `message ${role}`;
+      message.textContent = content;
+      chatBox.appendChild(message);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Allow Enter key to send
+    document.getElementById("prompt").addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById("submit").click();
+      }
+    });
+  </script>
 </body>
-</html>
+</html>Copied!   
