@@ -18,7 +18,7 @@ export default {
             input[type="text"] { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; }
             button { background-color: var(--primary); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 1rem; }
             button:hover { opacity: 0.9; }
-            #output { margin-top: 1.5rem; padding: 1rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.375rem; white-space: pre-wrap; }
+            #output { margin-top: 1.5rem; padding: 1rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.375rem; min-height: 60px; }
           </style>
         </head>
         <body>
@@ -31,7 +31,7 @@ export default {
               </div>
               <button type="submit">Send →</button>
             </form>
-            <pre id="output">Response will appear here...</pre>
+            <div id="output">Response will appear here...</div>
           </div>
 
           <script>
@@ -40,7 +40,7 @@ export default {
             form.addEventListener('submit', async (e) => {
               e.preventDefault();
               const prompt = form.prompt.value;
-              output.textContent = "Loading...";
+              output.textContent = "Thinking...";
               try {
                 const res = await fetch(window.location.href, {
                   method: 'POST',
@@ -48,7 +48,7 @@ export default {
                   body: JSON.stringify({ prompt })
                 });
                 const data = await res.json();
-                output.textContent = JSON.stringify(data.output, null, 2);
+                output.textContent = data.output.choices[0].message.content;
               } catch (err) {
                 output.textContent = "Error: " + err.message;
               }
