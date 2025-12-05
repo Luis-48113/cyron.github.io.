@@ -43,7 +43,7 @@ export default {
         if (!HF_TOKEN) throw new Error("Hugging Face token not set in environment");
 
         const response = await fetch(
-          "https://router.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct",
+          "https://router.huggingface.co/hf-inference/v1/chat/completions",
           {
             method: "POST",
             headers: {
