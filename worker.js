@@ -37,9 +37,8 @@ export default {
         const HF_TOKEN = env.HF_TOKEN;
         if (!HF_TOKEN) throw new Error("Hugging Face token not set in environment");
 
-        // Correct Router API endpoint for completions
         const response = await fetch(
-          "https://router.huggingface.co/models/meta-llama/Llama-3-8b-chat-hf",
+          "https://api-inference.huggingface.co/v1/llm/meta-llama/Llama-3-8b-chat-hf",
           {
             method: "POST",
             headers: {
@@ -54,7 +53,10 @@ export default {
 
         const data = await response.json();
 
-        return new Response(JSON.stringify({ output: data }), {
+        // Router API wraps the text in `generated_text` inside an array
+        const outputText = data?.generated_text ?? data;
+
+        return new Response(JSON.stringify({ output: outputText }), {
           headers: { "Content-Type": "application/json" },
         });
       } catch (err) {
