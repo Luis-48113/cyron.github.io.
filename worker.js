@@ -28,13 +28,7 @@ export default {
                   body: JSON.stringify({ prompt })
                 });
                 const data = await res.json();
-                
-                // Extract generated text
-                if (data.output && Array.isArray(data.output)) {
-                  output.textContent = data.output.map(item => item.generated_text).join('\\n');
-                } else {
-                  output.textContent = JSON.stringify(data, null, 2);
-                }
+                output.textContent = JSON.stringify(data.output, null, 2);
               });
             </script>
           </body>
@@ -45,13 +39,11 @@ export default {
       try {
         const { prompt } = await request.json();
 
-        // Hugging Face API token from environment variable
-        const HF_TOKEN = env.HF_TOKEN;
+        const HF_TOKEN = env.HF_TOKEN; // Secret from Wrangler
         if (!HF_TOKEN) throw new Error("Hugging Face token not set in environment");
 
-        // Call Meta LLaMA 3 8B via Router API
         const response = await fetch(
-          "https://router.huggingface.co/models/meta-llama/Llama-3-8b-chat",
+          "https://api-inference.huggingface.co/models/meta-llama/Llama-3-8b",
           {
             method: "POST",
             headers: {
@@ -65,7 +57,14 @@ export default {
           }
         );
 
-        const data = await response.json();
+        // Safe parsing: if the API returns non-JSON, show the raw response
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          data = { error: responseText };
+        }
 
         return new Response(JSON.stringify({ output: data }), {
           headers: { "Content-Type": "application/json" },
