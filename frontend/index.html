@@ -10,22 +10,22 @@
   <div class="chat-container">
     <h1>Cyron AI</h1>
     <div id="chat-box"></div>
-    <textarea id="prompt" placeholder="Type your question..."></textarea>
-    <button id="submit">Send</button>
+    <div class="input-container">
+      <textarea id="prompt" placeholder="Message Cyron..."></textarea>
+      <button id="submit">Send</button>
+    </div>
   </div>
   <script>
-    const WORKER_URL = "https://cyron-worker.gx8nz7qrdr.workers.dev/";
+    const WORKER_URL = "https://your-worker.your-subdomain.workers.dev";
     let history = [];
 
     document.getElementById("submit").addEventListener("click", async () => {
       const prompt = document.getElementById("prompt").value.trim();
       if (!prompt) return;
 
-      // Add user message
       addMessage("user", prompt);
       document.getElementById("prompt").value = "";
 
-      // Call worker API
       const response = await fetch(WORKER_URL + "/api", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,9 +34,8 @@
 
       const data = await response.json();
       const aiResponse = data.choices?.[0]?.message?.content || "Error";
-
-      // Add AI response
       addMessage("ai", aiResponse);
+      
       history.push({ role: "user", content: prompt });
       history.push({ role: "assistant", content: aiResponse });
     });
@@ -45,12 +44,11 @@
       const chatBox = document.getElementById("chat-box");
       const message = document.createElement("div");
       message.className = `message ${role}`;
-      message.textContent = content;
+      message.innerHTML = `<div class="message-content">${content}</div>`;
       chatBox.appendChild(message);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Allow Enter key to send
     document.getElementById("prompt").addEventListener("keypress", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -59,4 +57,4 @@
     });
   </script>
 </body>
-</html>Copied!   
+</html>   
