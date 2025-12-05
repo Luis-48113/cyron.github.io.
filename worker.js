@@ -1,7 +1,6 @@
 export default {
   async fetch(request, env) {
     if (request.method === "GET") {
-      // Simple HTML form for testing
       const html = `
         <!DOCTYPE html>
         <html lang="en">
@@ -25,7 +24,7 @@ export default {
                 body: JSON.stringify({prompt})
               });
               const data = await res.json();
-              output.textContent = JSON.stringify(data.output, null, 2);
+              output.textContent = data.output ?? JSON.stringify(data, null, 2);
             });
           </script>
         </body>
@@ -38,8 +37,9 @@ export default {
         const HF_TOKEN = env.HF_TOKEN;
         if (!HF_TOKEN) throw new Error("Hugging Face token not set in environment");
 
+        // Correct Router API endpoint for completions
         const response = await fetch(
-          "https://router.huggingface.co/api/chain/completions",
+          "https://router.huggingface.co/models/meta-llama/Llama-3-8b-chat-hf",
           {
             method: "POST",
             headers: {
@@ -47,8 +47,7 @@ export default {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              model: "meta-llama/Llama-3-8b-chat-hf",
-              input: prompt
+              inputs: prompt
             })
           }
         );
